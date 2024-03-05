@@ -1,4 +1,116 @@
 <html>
-  <title>Bill Board Game</title>
-  <body>Hello World</body>
+    <head>
+        <title>Bill Board Game</title>
+        <link rel="stylesheet" href="index.css">
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" type="text/javascript"></script>
+    </head>
+
+    <body>
+        <div id="resize">
+            <span id="desc">Welcome to my game,<br>try to progress <br>as long as possible <br>without hitting the <br>start over spaces! <br><br>By Gavin Dayton</span>
+            <div id="balloons">
+                <img src="ballooms.png" id="balloon1">
+                <img src="ballooms.png" id="balloon2">
+            </div>
+            <div id="board">
+                <div id="bill-parent">
+                    <img src="bill.png" alt="bill guy image is not loading" id="bill">
+                </div>
+                <button id="diceButton" onclick="playerTurn(null)">Roll Dice!</button>
+                <span id="diceRoll">roll: 0</span>
+            </div>
+        </div>
+    </body>
+
+    <script>
+        let board = new Image();
+        let playerPiece = $("#bill");
+        let currentPlayerPos = 0;
+        let rollDisplay = $("#diceRoll");
+        let currentlyRollingDice = false;
+        board.src = "boardtemp (1).png";        
+
+        let spots = [[920, 874], [1091, 787], [1187, 608], [1159, 420], [1030, 253], [800, 173], [570, 173], [351, 253], [229, 420], [198, 608], [293, 787], [454, 874], [691, 853]];
+        let redSpaceIndexes = [2, 4, 6, 10];
+        board.onload = function() {
+            initAndMovePlayer(null);
+        };
+
+        $(window).on("load resize", function() {
+            
+        });
+
+        async function playerTurn(player) {
+            if(currentlyRollingDice) {
+                return;
+            } else {
+                currentlyRollingDice = true;
+            }
+
+            for(let i = 0; i < 20; i++) {
+                await sleep(50);
+                rollDisplay.text("roll: " + (Math.round(Math.random() * 5) + 1));
+            }
+
+            let roll = Math.round(Math.random() * 5) + 1;
+
+            rollDisplay.text("roll: " + roll);
+
+            await sleep(500);
+
+            for(let i = 0; i < roll; i++) {
+                if (currentPlayerPos == spots.length - 1) {
+                    currentlyRollingDice = false;
+                    $("#balloons").css({
+                        "top": "63%"
+                    })
+                    break;
+                }
+
+                currentPlayerPos++;
+                initAndMovePlayer(null);
+                await sleep(600);
+            }
+            if (redSpaceIndexes.indexOf(currentPlayerPos) != -1) {
+                currentPlayerPos = 0;
+                initAndMovePlayer(null);
+            }
+            if (currentPlayerPos == spots.length - 1) {
+                    currentlyRollingDice = false;
+                    $("#balloons").css({
+                        "top": "50%"
+                    })
+                    return
+            }
+            currentlyRollingDice = false;
+        }
+
+        function initAndMovePlayer(override) {
+            let index = currentPlayerPos;
+            if (override != null) {
+                index = override;
+            }
+            $("#bill-parent").css({
+                "left":  spots[index][0] * 100 / board.width + "%",
+                "top":   spots[index][1] * 100 / board.height + "%"
+            }); 
+        }
+
+        function getBgScalar() {
+            let scalar = 0;
+
+            if(window.innerHeight <= window.innerWidth) {
+                scalar = window.innerHeight / board.height;
+            } else {
+                scalar = window.innerWidth / board.width;
+            }
+
+            return scalar;
+        }
+
+        //milliseconds
+        function sleep (time) {
+            return new Promise((resolve) => setTimeout(resolve, time));
+        }
+    </script>
 </html>
